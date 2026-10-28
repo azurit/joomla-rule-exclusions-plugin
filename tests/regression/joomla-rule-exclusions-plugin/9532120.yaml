@@ -1,0 +1,44 @@
+---
+meta:
+  author: "Gen Tobimatsu"
+  description: "Joomla Rule Exclusions Plugin - custom HTML modules"
+rule_id: 9532120
+tests:
+  - test_id: 1
+    desc: Saving a custom HTML module with styled HTML is not blocked
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Content-Type: application/x-www-form-urlencoded
+            Cookie: 0123456789abcdef0123456789abcdef=abcdefghijklmnopqrstuvwxyz
+          port: 80
+          method: POST
+          version: "HTTP/1.1"
+          uri: /administrator/index.php?option=com_modules&layout=edit&id=104
+          data: "jform%5Btitle%5D=News&jform%5Bcontent%5D=%3Ch4+style%3D%22border%3A+2px+solid+%23ffbe00%3B+border-radius%3A+4px%3B%22%3ENews%3C%2Fh4%3E&task=module.apply"
+        output:
+          log:
+            no_expect_ids: [941100, 941160]
+  - test_id: 2
+    desc: The article body field is not excluded on the module screen
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Content-Type: application/x-www-form-urlencoded
+            Cookie: 0123456789abcdef0123456789abcdef=abcdefghijklmnopqrstuvwxyz
+          port: 80
+          method: POST
+          version: "HTTP/1.1"
+          uri: /administrator/index.php?option=com_modules&layout=edit&id=104
+          data: "jform%5Barticletext%5D=%3Ch4+style%3D%22color%3A+%23333333%3B%22%3ENews%3C%2Fh4%3E&task=module.apply"
+        output:
+          log:
+            expect_ids: [941160]

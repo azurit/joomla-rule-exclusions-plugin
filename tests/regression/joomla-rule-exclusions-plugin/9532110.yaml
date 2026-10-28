@@ -1,0 +1,155 @@
+---
+meta:
+  author: "Gen Tobimatsu"
+  description: "Joomla Rule Exclusions Plugin - article editor"
+rule_id: 9532110
+tests:
+  - test_id: 1
+    desc: Saving an article with styled HTML in the body is not blocked
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Content-Type: application/x-www-form-urlencoded
+            Cookie: 0123456789abcdef0123456789abcdef=abcdefghijklmnopqrstuvwxyz
+          port: 80
+          method: POST
+          version: "HTTP/1.1"
+          uri: /administrator/index.php?option=com_content&view=article&layout=edit&id=1
+          data: "jform%5Btitle%5D=News&jform%5Barticletext%5D=%3Ch4+style%3D%22border%3A+2px+solid+%23ffbe00%3B+color%3A+%23333333%3B%22%3ENews%3C%2Fh4%3E%3Cp%3EText%3C%2Fp%3E&task=article.apply"
+        output:
+          log:
+            no_expect_ids: [941100, 941160]
+  - test_id: 2
+    desc: Text in parentheses right after a closing tag is not blocked by 932130
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Content-Type: application/x-www-form-urlencoded
+            Cookie: 0123456789abcdef0123456789abcdef=abcdefghijklmnopqrstuvwxyz
+          port: 80
+          method: POST
+          version: "HTTP/1.1"
+          uri: /administrator/index.php?option=com_content&view=article&layout=edit&id=1
+          data: "jform%5Barticletext%5D=%3Cp%3E%3Cstrong%3E%E6%B3%A8%E6%84%8F%3C%2Fstrong%3E%28%E5%86%85%E5%AE%B9%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6%29%3C%2Fp%3E&task=article.apply"
+        output:
+          log:
+            no_expect_ids: [932130]
+  - test_id: 3
+    desc: Without a Joomla session cookie the body is still checked
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Content-Type: application/x-www-form-urlencoded
+          port: 80
+          method: POST
+          version: "HTTP/1.1"
+          uri: /administrator/index.php?option=com_content&view=article&layout=edit&id=1
+          data: "jform%5Barticletext%5D=%3Ch4+style%3D%22color%3A+%23333333%3B%22%3ENews%3C%2Fh4%3E&task=article.apply"
+        output:
+          log:
+            expect_ids: [941160]
+  - test_id: 4
+    desc: A cookie value that is not a session ID does not enable the exclusion
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Content-Type: application/x-www-form-urlencoded
+            Cookie: 0123456789abcdef0123456789abcdef=%3Cx%3E
+          port: 80
+          method: POST
+          version: "HTTP/1.1"
+          uri: /administrator/index.php?option=com_content&view=article&layout=edit&id=1
+          data: "jform%5Barticletext%5D=%3Ch4+style%3D%22color%3A+%23333333%3B%22%3ENews%3C%2Fh4%3E&task=article.apply"
+        output:
+          log:
+            expect_ids: [941160]
+  - test_id: 5
+    desc: Other fields are still checked
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Content-Type: application/x-www-form-urlencoded
+            Cookie: 0123456789abcdef0123456789abcdef=abcdefghijklmnopqrstuvwxyz
+          port: 80
+          method: POST
+          version: "HTTP/1.1"
+          uri: /administrator/index.php?option=com_content&view=article&layout=edit&id=1
+          data: "jform%5Btitle%5D=%3Cscript%3Ealert%281%29%3C%2Fscript%3E&task=article.apply"
+        output:
+          log:
+            expect_ids: [941100]
+  - test_id: 6
+    desc: Non-XSS rules still apply to the body
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Content-Type: application/x-www-form-urlencoded
+            Cookie: 0123456789abcdef0123456789abcdef=abcdefghijklmnopqrstuvwxyz
+          port: 80
+          method: POST
+          version: "HTTP/1.1"
+          uri: /administrator/index.php?option=com_content&view=article&layout=edit&id=1
+          data: "jform%5Barticletext%5D=1%27+UNION+SELECT+username%2Cpassword+FROM+jos_users--+&task=article.apply"
+        output:
+          log:
+            expect_ids: [942100]
+  - test_id: 7
+    desc: GET requests are not excluded
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Cookie: 0123456789abcdef0123456789abcdef=abcdefghijklmnopqrstuvwxyz
+          port: 80
+          method: GET
+          version: "HTTP/1.1"
+          uri: /administrator/index.php?option=com_content&layout=edit&jform%5Barticletext%5D=%3Cscript%3Ealert%281%29%3C%2Fscript%3E
+        output:
+          log:
+            expect_ids: [941100]
+  - test_id: 8
+    desc: Other paths are not excluded
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: localhost
+            User-Agent: OWASP CRS test agent
+            Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+            Content-Type: application/x-www-form-urlencoded
+            Cookie: 0123456789abcdef0123456789abcdef=abcdefghijklmnopqrstuvwxyz
+          port: 80
+          method: POST
+          version: "HTTP/1.1"
+          uri: /index.php?option=com_content&view=article&layout=edit&id=1
+          data: "jform%5Barticletext%5D=%3Ch4+style%3D%22color%3A+%23333333%3B%22%3ENews%3C%2Fh4%3E&task=article.save"
+        output:
+          log:
+            expect_ids: [941160]

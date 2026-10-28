@@ -1,0 +1,48 @@
+# OWASP CRS Plugin Descriptor
+# See https://github.com/coreruleset/plugin-registry for the schema definition.
+
+schema_version: 1
+
+plugin:
+  name: "joomla-rule-exclusions-plugin"
+  description: "CRS rule exclusions for the Joomla administrator back end"
+  long_description: |
+    Provides narrow rule exclusions so that editors can save articles, custom
+    HTML modules, categories and the offline message in the Joomla
+    administrator back end. Only the content field of each screen is excluded,
+    only from the XSS rules and rule 932130, and only for POST requests to the
+    administrator entry point that carry a Joomla session cookie.
+  type: "3rd-party"
+  category: "rule-exclusion"
+  status: "untested"
+  license: "Apache-2.0"
+  authors:
+    - name: "futsure0"
+      url: "https://github.com/futsure0"
+  repository: "https://github.com/futsure0/joomla-rule-exclusions-plugin"
+  keywords:
+    - "joomla"
+    - "cms"
+    - "rule-exclusions"
+
+rule_id_range:
+  # Not yet reserved in the plugin registry.
+  start: 9532000
+  end: 9532999
+
+compatibility:
+  crs_version: ">=4.0.0"
+
+configuration:
+  file: "plugins/joomla-rule-exclusions-config.conf"
+  variables:
+    - name: "tx.joomla-rule-exclusions-plugin_enabled"
+      type: "boolean"
+      default: 1
+      description: "Enables or disables the plugin (0 to disable)."
+      required: false
+    - name: "tx.joomla-rule-exclusions-plugin_path"
+      type: "string"
+      default: "/"
+      description: "Path prefix of the Joomla installation, starting and ending with /."
+      required: false
