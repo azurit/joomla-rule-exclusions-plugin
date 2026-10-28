@@ -1,4 +1,5 @@
 # OWASP CRS - Joomla Rule Exclusions Plugin
+[![Integration tests](https://github.com/futsure0/joomla-rule-exclusions-plugin/actions/workflows/integration.yml/badge.svg?branch=main)](https://github.com/futsure0/joomla-rule-exclusions-plugin/actions/workflows/integration.yml?query=branch%3Amain)
 
 ## Description
 
